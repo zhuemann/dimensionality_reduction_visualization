@@ -4,12 +4,17 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Cursor
+import scipy.spatial
 
 import tkinter as tk
 from tkinter import ttk
-from make_umap import make_umap
+from make_umap import MyUmap
 #from tkinter import *
 from tkinter import HORIZONTAL
+
+import numpy as np
+
 
 LARGE_FONT = ("Verdana", 12)
 
@@ -54,10 +59,6 @@ class StartPage(tk.Frame):
         button = ttk.Button(self, text="UMap",
                             command=lambda: controller.show_frame(PageOne))
         button.place(x=1,y=1)
-        #button.pack()
-
-
-
 
 class PageOne(tk.Frame):
 
@@ -68,62 +69,99 @@ class PageOne(tk.Frame):
 
         button1 = ttk.Button(self, text="Back to Home",
                              command=lambda: controller.show_frame(StartPage))
-        #button1.pack()
         button1.place(x=50,y=1)
 
-        fig = Figure(figsize=(4, 4), dpi=100)
+        #Rahul's code
+        myumap = MyUmap()
+        myumap.make_umap()
+        fig = myumap.show_classes()
 
-        a_sub = fig.add_subplot(111)
+        def update_canvas(fig):
+            canvas = FigureCanvasTkAgg(fig, self)
+            canvas.draw()
+            canvas.get_tk_widget().place(x=10, y=40)
+            #toolbar = NavigationToolbar2Tk(canvas, self)
+            #toolbar.update()
+            #canvas._tkcanvas.pack(side=tk.TOP, fill=None, expand=False)
+            canvas._tkcanvas.place(x=10, y=40)
+
+        update_canvas(fig)
+
+        def update_canvas_sidepanel(fig_2, point):
+            canvas = FigureCanvasTkAgg(fig_2, self)
+            canvas.draw()
+            canvas.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
+            canvas._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
+            canvas._tkcanvas.place(x=420, y=240)
+
+            # will plot the individual nearest neighbors if given a point
+            if point != None:
+                myumap.show_sidepanel_data(fig_2, point)
 
 
-        embedding, targets = make_umap()
-        a_sub.scatter(embedding[:, 0], embedding[:, 1], c=targets, cmap='Spectral', s=5)
+        fig_2 = myumap.show_sidepanel()
+        update_canvas_sidepanel(fig_2, point=None)
 
+        def switch_distortion_class():
+            if btn_text.get() == "Show Distortions":
+                k = scalevar.get()
+                fig = myumap.show_distortion(k)
+                update_canvas(fig)
+                plt.close(fig)
+                btn_text.set("Show Classes")
+            else:
+                fig = myumap.show_classes()
+                update_canvas(fig)
+                plt.close(fig)
+                btn_text.set("Show Distortions")
 
-        canvas = FigureCanvasTkAgg(fig, self)
-        canvas.draw()
-        #canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=None, expand=False)
-        canvas.get_tk_widget().place(x=10, y=40)
+        def update_k(value=None):
+            if btn_text.get() == "Show Classes":
+                k = scalevar.get()
+                print('k = ',k)
+                fig = myumap.show_distortion(k)
+                update_canvas(fig)
+                plt.close(fig)
 
-        #toolbar = NavigationToolbar2Tk(canvas, self)
-        #toolbar.update()
-        #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        #canvas._tkcanvas.pack(side=tk.TOP, fill=None, expand=False)
-        canvas._tkcanvas.place(x=10, y=40)
+        btn_text = tk.StringVar()
+        btn_text.set("Show Distortions")
 
-        fig_2 = Figure(figsize=(4, 2), dpi=100)
-
-        a_sub_2 = fig_2.add_subplot(241)
-        a_sub_2 = fig_2.add_subplot(242)
-        a_sub_2 = fig_2.add_subplot(243)
-        a_sub_2 = fig_2.add_subplot(244)
-        a_sub_2 = fig_2.add_subplot(245)
-        a_sub_2 = fig_2.add_subplot(246)
-        a_sub_2 = fig_2.add_subplot(247)
-        a_sub_2 = fig_2.add_subplot(248)
-        canvas = FigureCanvasTkAgg(fig_2, self)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
-        canvas._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
-        canvas._tkcanvas.place(x=420, y=240)
-
-        w = tk.Scale(self, label="neighbors", from_=0, to=100, orient=HORIZONTAL) #orient=HORIZONTAL
+        scalevar = tk.IntVar()
+        scalevar.set(1)
+        w = tk.Scale(self, label="neighbors", from_=1, to=100, orient=HORIZONTAL,
+                     variable=scalevar)  # orient=HORIZONTAL
+        w.bind("<ButtonRelease-1>", update_k)
         w.place(x=450, y=40)
 
-        button2 = ttk.Button(self, text="Show Distortions",
-                             command=lambda: controller.show_frame(StartPage))
+        button2 = ttk.Button(self, textvariable=btn_text,
+                             command=lambda: switch_distortion_class())
 
         button2.place(x=450, y=110)
 
-        #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        def onclick(event):
+            x = event.xdata
+            y = event.ydata
+
+            print([x,y])
+            embedding_x = myumap.embedding[:, 0]
+            embedding_y = myumap.embedding[:, 1]
+            # calculates the closest point to the position clicked
+            def find_index_of_nearest_xy(y_array, x_array, y_point, x_point):
+                distance = (y_array - y_point) ** 2 + (x_array - x_point) ** 2
+                idx = np.where(distance == distance.min())
+                return idx[0]
+            closest_index = find_index_of_nearest_xy(embedding_y, embedding_x, y, x)
+            print(closest_index)
+            # updates the plots for closest neighbors
+            update_canvas_sidepanel(fig_2, point = closest_index)
+
+        print(fig)
+        fig.canvas.mpl_connect('button_press_event', onclick)
 
 
-
-#app = NearNeighborVisualization()
-#app.geometry("850x470")
-#app.mainloop()
 
 def create_GUI():
     app = NearNeighborVisualization()
     app.geometry("850x470")
+
     app.mainloop()
