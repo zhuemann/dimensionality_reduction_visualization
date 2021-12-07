@@ -1,0 +1,8 @@
+umap-learn
+seaborn
+openpyxl
+#sklearn
+requests
+
+numpy
+matplotlib
