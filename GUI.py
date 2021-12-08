@@ -74,8 +74,6 @@ class PageOne(tk.Frame):
         #Rahul's code
         myumap = MyUmap()
         myumap.make_umap()
-        #fig_1 = plt.figure(figsize=(4, 4), dpi=100)
-        #a_sub = fig_1.add_subplot(111)
         fig = myumap.show_classes()
 
         def update_canvas(fig):
@@ -89,32 +87,29 @@ class PageOne(tk.Frame):
 
         update_canvas(fig)
 
-        def update_canvas_sidepanel(fig_2, point):
+        def update_canvas_sidepanel(fig_2):
             canvas = FigureCanvasTkAgg(fig_2, self)
             canvas.draw()
             canvas.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
             canvas._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
             canvas._tkcanvas.place(x=420, y=240)
 
-            # will plot the individual nearest neighbors if given a point
-            if point != None:
-                myumap.show_sidepanel_data(fig_2, point)
-
 
         fig_2 = myumap.show_sidepanel()
-        update_canvas_sidepanel(fig_2, point=None)
+        update_canvas_sidepanel(fig_2)
 
         def switch_distortion_class():
             if btn_text.get() == "Show Distortions":
                 k = scalevar.get()
                 fig = myumap.show_distortion(k)
                 update_canvas(fig)
+                fig.canvas.mpl_connect('button_press_event', onclick)
                 plt.close(fig)
                 btn_text.set("Show Classes")
             else:
                 fig = myumap.show_classes()
-                fig.canvas.mpl_connect('button_press_event', onclick)
                 update_canvas(fig)
+                fig.canvas.mpl_connect('button_press_event', onclick)
                 plt.close(fig)
                 btn_text.set("Show Distortions")
 
@@ -124,6 +119,7 @@ class PageOne(tk.Frame):
                 print('k = ',k)
                 fig = myumap.show_distortion(k)
                 update_canvas(fig)
+                fig.canvas.mpl_connect('button_press_event', onclick)
                 plt.close(fig)
 
         btn_text = tk.StringVar()
@@ -144,15 +140,24 @@ class PageOne(tk.Frame):
         def onclick(event):
             x = event.xdata
             y = event.ydata
-            click_point = np.asarray([x,y])
-            def KNN(k, point, embedding):
-                return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[0] #[1:k + 1]
 
-            closest_index = KNN(1, click_point, myumap.embedding)
+            point = np.array([x,y])
+            print(point)
+            # embedding_x = myumap.embedding[:, 0]
+            # embedding_y = myumap.embedding[:, 1]
+            # # calculates the closest point to the position clicked
+            # def find_index_of_nearest_xy(y_array, x_array, y_point, x_point):
+            #     distance = (y_array - y_point) ** 2 + (x_array - x_point) ** 2
+            #     idx = np.where(distance == distance.min())
+            #     return idx[0]
+            # closest_index = find_index_of_nearest_xy(embedding_y, embedding_x, y, x)
+            # print(closest_index)
+            # # updates the plots for closest neighbors
+            fig_2 = myumap.show_sidepanel_click(point)
+            update_canvas_sidepanel(fig_2)
+            plt.close(fig_2)
 
-            # updates the plots for closest neighbors
-            update_canvas_sidepanel(fig_2, point = closest_index)
-
+        print(fig)
         fig.canvas.mpl_connect('button_press_event', onclick)
 
 
@@ -162,5 +167,3 @@ def create_GUI():
     app.geometry("850x470")
 
     app.mainloop()
-
-

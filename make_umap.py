@@ -9,8 +9,8 @@ import requests
 import umap
 from matplotlib.widgets import Cursor
 
-
 import seaborn as sns
+#import ipdb
 
 
 class MyUmap():
@@ -50,12 +50,7 @@ class MyUmap():
 
     def show_distortion(self, k=1):
         def KNN(k, point, embedding):
-            #print("point")
-            #print(point)
-            #print(embedding)
             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
-
-
 
         embedding = self.embedding
         data = self.data
@@ -86,7 +81,8 @@ class MyUmap():
 
     def show_classes(self):
         embedding = self.embedding
-        fig = plt.figure(figsize=(4, 4), dpi=100) #doesn't this create a new fig each time show class is called so it is a new instance
+        fig = plt.figure(figsize=(4, 4),
+                         dpi=100)  # doesn't this create a new fig each time show class is called so it is a new instance
         a_sub = fig.add_subplot(111)
         cursor = Cursor(a_sub, horizOn=True, vertOn=True, useblit=True,
                         color='r', linewidth=1)
@@ -108,20 +104,49 @@ class MyUmap():
         a_sub_2 = fig_2.add_subplot(248)
         return fig_2
 
-    def show_sidepanel_data(self, fig_2, point_idx):
-
-        embedding = self.embedding
-        data = self.data
+    def show_sidepanel_data(self, fig_2, point):
+        print("inside plotings data")
 
         def KNN(k, point, embedding):
             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
-        nearest_2d_points = KNN(4, embedding[point_idx], embedding)
-        nearest_hd_points = KNN(4, data[point_idx], data)
+        nearest_2d_points = KNN(4, point, self.embedding)
+        nearest_hd_points = KNN(4, point, self.data)
+        print(nearest_2d_points)
+        print(nearest_hd_points)
 
-        for i in range(0,4):
+        for i in range(0, 4):
             fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
-            fig_2.axes[i+4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
+            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
+
+    def show_sidepanel_click(self, point=None):
+
+        def KNN(k, point, embedding):
+            return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
+
+        print(point[np.newaxis, :].shape)
+        closest_idx = KNN(1, point, self.embedding)[0]
+        point = self.embedding[closest_idx]
+        nearest_2d_points = KNN(4, point, self.embedding)
+        nearest_hd_points = KNN(4, self.data[closest_idx], self.data)
+        print(nearest_2d_points)
+        print(nearest_hd_points)
+
+        # ipdb.set_trace()
+        fig_2 = plt.figure(figsize=(4, 2), dpi=100)
+
+        for i in range(4):
+            a_sub_2 = fig_2.add_subplot(241 + i)
+            a_sub_2.imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
+        for i in range(4):
+            a_sub_2 = fig_2.add_subplot(245 + i)
+            a_sub_2.imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
+
+        return fig_2
+
+
+
+
 
 
 
