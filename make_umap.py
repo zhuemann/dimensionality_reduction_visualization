@@ -9,6 +9,7 @@ import requests
 import umap
 from matplotlib.widgets import Cursor
 
+
 import seaborn as sns
 
 

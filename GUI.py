@@ -74,6 +74,8 @@ class PageOne(tk.Frame):
         #Rahul's code
         myumap = MyUmap()
         myumap.make_umap()
+        #fig_1 = plt.figure(figsize=(4, 4), dpi=100)
+        #a_sub = fig_1.add_subplot(111)
         fig = myumap.show_classes()
 
         def update_canvas(fig):
@@ -111,6 +113,7 @@ class PageOne(tk.Frame):
                 btn_text.set("Show Classes")
             else:
                 fig = myumap.show_classes()
+                fig.canvas.mpl_connect('button_press_event', onclick)
                 update_canvas(fig)
                 plt.close(fig)
                 btn_text.set("Show Distortions")
@@ -159,3 +162,5 @@ def create_GUI():
     app.geometry("850x470")
 
     app.mainloop()
+
+
