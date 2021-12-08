@@ -60,6 +60,34 @@ class StartPage(tk.Frame):
                             command=lambda: controller.show_frame(PageOne))
         button.place(x=1,y=1)
 
+        options = ["MNIST Digits", "MNIST Fashion", "Select Your Own"]
+        value_inside = tk.StringVar(self)
+        value_inside.set("Select an Option")
+        drop = tk.OptionMenu(self, value_inside, *options)
+        drop.place(x=100,y=100)
+
+        def print_answers():
+            print("Selected Option: {}".format(value_inside.get()))
+            if value_inside.get() == options[0]:
+                print("put Umap digits call here")
+            if value_inside.get() == options[1]:
+                print("put Umap fashion call here")
+            if value_inside.get() == options[2]:
+                print("put select your own pathing fucntion here")
+                browseFiles()
+
+            return None
+        submit_button = tk.Button(self, text='Submit', command=print_answers)
+        submit_button.place(x=100,y=140)
+
+        def browseFiles():
+            filename = tk.filedialog.askopenfilename(initialdir="/", title="Select a File",
+                                                     filetypes=(("Text files","*.txt*"), ("all files","*.*")))
+
+        instructions = tk.Label(self, text="1. Select your data set"
+                                           "2. Check out your UMAP")
+        instructions.place(x=250,y=250)
+
 class PageOne(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -98,6 +126,17 @@ class PageOne(tk.Frame):
 
         fig_2 = myumap.show_sidepanel()
         update_canvas_sidepanel(fig_2)
+
+        def update_canvas_clickpoint(fig_3):
+            canvas = FigureCanvasTkAgg(fig_3, self)
+            canvas.draw()
+            canvas.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
+            canvas._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
+            canvas._tkcanvas.place(x=600, y=40)
+
+        fig_3 = myumap.show_clickedpoint(point=None)
+        update_canvas_clickpoint(fig_3)
+
 
         def switch_distortion_class():
             if btn_text.get() == "Show Distortions":
@@ -144,21 +183,15 @@ class PageOne(tk.Frame):
 
             point = np.array([x,y])
             print(point)
-            # embedding_x = myumap.embedding[:, 0]
-            # embedding_y = myumap.embedding[:, 1]
-            # # calculates the closest point to the position clicked
-            # def find_index_of_nearest_xy(y_array, x_array, y_point, x_point):
-            #     distance = (y_array - y_point) ** 2 + (x_array - x_point) ** 2
-            #     idx = np.where(distance == distance.min())
-            #     return idx[0]
-            # closest_index = find_index_of_nearest_xy(embedding_y, embedding_x, y, x)
-            # print(closest_index)
             # # updates the plots for closest neighbors
             fig_2 = myumap.show_sidepanel_click(point)
             update_canvas_sidepanel(fig_2)
             plt.close(fig_2)
+            fig_3 = myumap.show_clickedpoint(point)
+            update_canvas_clickpoint(fig_3)
+            plt.close(fig_3)
 
-        print(fig)
+
         fig.canvas.mpl_connect('button_press_event', onclick)
 
 

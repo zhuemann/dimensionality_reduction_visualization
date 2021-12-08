@@ -81,8 +81,7 @@ class MyUmap():
 
     def show_classes(self):
         embedding = self.embedding
-        fig = plt.figure(figsize=(4, 4),
-                         dpi=100)  # doesn't this create a new fig each time show class is called so it is a new instance
+        fig = plt.figure(figsize=(4, 4),dpi=100)
         a_sub = fig.add_subplot(111)
         cursor = Cursor(a_sub, horizOn=True, vertOn=True, useblit=True,
                         color='r', linewidth=1)
@@ -105,7 +104,6 @@ class MyUmap():
         return fig_2
 
     def show_sidepanel_data(self, fig_2, point):
-        print("inside plotings data")
 
         def KNN(k, point, embedding):
             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
@@ -124,13 +122,10 @@ class MyUmap():
         def KNN(k, point, embedding):
             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
-        print(point[np.newaxis, :].shape)
         closest_idx = KNN(1, point, self.embedding)[0]
         point = self.embedding[closest_idx]
         nearest_2d_points = KNN(4, point, self.embedding)
         nearest_hd_points = KNN(4, self.data[closest_idx], self.data)
-        print(nearest_2d_points)
-        print(nearest_hd_points)
 
         # ipdb.set_trace()
         fig_2 = plt.figure(figsize=(4, 2), dpi=100)
@@ -143,6 +138,18 @@ class MyUmap():
             a_sub_2.imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
 
         return fig_2
+
+    def show_clickedpoint(self, point):
+        fig = plt.figure(figsize=(2, 2),dpi=100)
+        sub_plot = fig.add_subplot(111)
+        # Shows the image for the closest point clicked
+        if np.any(point != None):
+            def KNN(k, point, embedding):
+                return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
+            print(point)
+            closest_idx = KNN(1, point, self.embedding)[0]
+            sub_plot.imshow(self.data[closest_idx].reshape(8, 8))
+        return fig
 
 
 
