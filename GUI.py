@@ -86,7 +86,8 @@ class PageOne(tk.Frame):
             canvas._tkcanvas.place(x=10, y=40)
 
         update_canvas(fig)
-
+        toolbar = NavigationToolbar2Tk(fig.canvas, self)
+        toolbar.update()
         def update_canvas_sidepanel(fig_2):
             canvas = FigureCanvasTkAgg(fig_2, self)
             canvas.draw()
