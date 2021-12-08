@@ -141,21 +141,15 @@ class PageOne(tk.Frame):
         def onclick(event):
             x = event.xdata
             y = event.ydata
+            click_point = np.asarray([x,y])
+            def KNN(k, point, embedding):
+                return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[0] #[1:k + 1]
 
-            print([x,y])
-            embedding_x = myumap.embedding[:, 0]
-            embedding_y = myumap.embedding[:, 1]
-            # calculates the closest point to the position clicked
-            def find_index_of_nearest_xy(y_array, x_array, y_point, x_point):
-                distance = (y_array - y_point) ** 2 + (x_array - x_point) ** 2
-                idx = np.where(distance == distance.min())
-                return idx[0]
-            closest_index = find_index_of_nearest_xy(embedding_y, embedding_x, y, x)
-            print(closest_index)
+            closest_index = KNN(1, click_point, myumap.embedding)
+
             # updates the plots for closest neighbors
             update_canvas_sidepanel(fig_2, point = closest_index)
 
-        print(fig)
         fig.canvas.mpl_connect('button_press_event', onclick)
 
 

@@ -49,7 +49,12 @@ class MyUmap():
 
     def show_distortion(self, k=1):
         def KNN(k, point, embedding):
+            #print("point")
+            #print(point)
+            #print(embedding)
             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
+
+
 
         embedding = self.embedding
         data = self.data
@@ -102,16 +107,16 @@ class MyUmap():
         a_sub_2 = fig_2.add_subplot(248)
         return fig_2
 
-    def show_sidepanel_data(self, fig_2, point):
-        print("inside plotings data")
+    def show_sidepanel_data(self, fig_2, point_idx):
+
+        embedding = self.embedding
+        data = self.data
 
         def KNN(k, point, embedding):
             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
-        nearest_2d_points = KNN(4, point, self.embedding)
-        nearest_hd_points = KNN(4, point, self.data)
-        print(nearest_2d_points)
-        print(nearest_hd_points)
+        nearest_2d_points = KNN(4, embedding[point_idx], embedding)
+        nearest_hd_points = KNN(4, data[point_idx], data)
 
         for i in range(0,4):
             fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
