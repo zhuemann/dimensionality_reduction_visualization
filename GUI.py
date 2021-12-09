@@ -193,8 +193,9 @@ class PageOne(tk.Frame):
 
             point = np.array([x,y])
             print(point)
+            k = scalevar.get()
             # # updates the plots for closest neighbors
-            myumap.show_click_response(fig,canvas,fig_2,fig_3,point)
+            myumap.show_click_response(fig,canvas,fig_2,fig_3,k,point)
             canvas_2.draw()
             canvas_3.draw()
 

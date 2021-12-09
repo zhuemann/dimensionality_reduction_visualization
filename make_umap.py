@@ -109,22 +109,22 @@ class MyUmap():
     #         fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
     #         fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
 
-    def show_click_response(self, fig, canvas, fig_2, fig_3, point=None):
+    def show_click_response(self, fig, canvas, fig_2, fig_3, k=4, point=None):
 
         closest_idx = self.KNN(1, point, self.embedding)[0]
         point = self.embedding[closest_idx]
-        nearest_2d_points = self.KNN(4, point, self.embedding)
-        nearest_hd_points = self.KNN(4, self.data[closest_idx], self.data)
+        nearest_2d_points = self.KNN(max(4,k), point, self.embedding)
+        nearest_hd_points = self.KNN(max(4,k), self.data[closest_idx], self.data)
 
         a_sub = fig.axes[0]
         abc = a_sub.scatter(self.embedding[closest_idx, 0], self.embedding[closest_idx, 1], c='k',marker='*', s=100)
-        abc2 = a_sub.scatter(self.embedding[nearest_hd_points, 0], self.embedding[nearest_hd_points, 1], c='k', s=25)
+        abc2 = a_sub.scatter(self.embedding[nearest_hd_points[:k], 0], self.embedding[nearest_hd_points[:k], 1], c='k', s=25)
 
         canvas.draw()
         abc.remove()
         abc2.remove()
 
-        for i in range(0, 4):
+        for i in range(4):
             fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
             fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
 
