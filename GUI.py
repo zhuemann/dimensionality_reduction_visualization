@@ -17,6 +17,7 @@ import numpy as np
 
 
 LARGE_FONT = ("Verdana", 12)
+DATASET = 1
 
 class NearNeighborVisualization(tk.Tk):
 
@@ -42,7 +43,7 @@ class NearNeighborVisualization(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(PageOne)
+        self.show_frame(StartPage)
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -67,14 +68,18 @@ class StartPage(tk.Frame):
         drop.place(x=350, y=140)
 
         def print_answers():
+            global DATASET
             print("Selected Option: {}".format(value_inside.get()))
             if value_inside.get() == options[0]:
                 print("put Umap digits call here")
+                DATASET = 1
             if value_inside.get() == options[1]:
                 print("put Umap fashion call here")
+                DATASET = 2
             if value_inside.get() == options[2]:
                 print("put select your own pathing fucntion here")
                 browseFiles()
+                DATASET = 3
 
             return None
         submit_button = tk.Button(self, text='Load', command=print_answers)
@@ -122,6 +127,7 @@ class PageOne(tk.Frame):
 
         #Rahul's code
         myumap = MyUmap()
+        myumap.load_data(DATASET)
         myumap.make_umap()
 
 

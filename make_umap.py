@@ -21,12 +21,26 @@ class MyUmap():
         self.nclasses = None
         self.images = None
 
-    def make_umap(self):
-        digits = load_digits()
-        self.data = digits.data
-        self.target = digits.target
+    def load_data(self,DATASET):
+        if DATASET==1:
+            print('loading digits dataset')
+            from sklearn.datasets import load_digits
+            digits = load_digits()
+            self.data = digits.data
+            self.target = digits.target
+            self.nclasses = np.unique(self.target).shape[0]
+            print(self.data.shape,self.target.shape)
 
-        self.nclasses = np.unique(self.target).shape[0]
+        if DATASET==2:
+            print('loading fmnist dataset')
+            from sklearn.datasets import fetch_openml
+            fmnist = fetch_openml(data_id = 40996)
+            self.data = fmnist.data.to_numpy()[:1000]
+            self.target = fmnist.target.to_numpy(int)[:1000]
+            self.nclasses = np.unique(self.target).shape[0]
+            print(self.data.shape,self.target.shape)
+
+    def make_umap(self):
 
         reducer = umap.UMAP(a=None, angular_rp_forest=False, b=None,
                             force_approximation_algorithm=False, init='spectral', learning_rate=1.0,
@@ -38,8 +52,8 @@ class MyUmap():
                             target_metric_kwds=None, target_n_neighbors=-1, target_weight=0.5,
                             transform_queue_size=4.0, transform_seed=88, unique=False, verbose=False)
 
-        reducer.fit(digits.data)
-        self.embedding = reducer.transform(digits.data)
+        reducer.fit(self.data)
+        self.embedding = reducer.transform(self.data)
 
         assert (np.all(self.embedding == reducer.embedding_))
 
