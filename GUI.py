@@ -53,18 +53,18 @@ class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Start Page", font=LARGE_FONT)
+        label = tk.Label(self, text="Welcome", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
         button = ttk.Button(self, text="UMap",
                             command=lambda: controller.show_frame(PageOne))
-        button.place(x=1,y=1)
+        button.place(x=380, y=360)
 
         options = ["MNIST Digits", "MNIST Fashion", "Select Your Own"]
         value_inside = tk.StringVar(self)
         value_inside.set("Select an Option")
         drop = tk.OptionMenu(self, value_inside, *options)
-        drop.place(x=100,y=100)
+        drop.place(x=350, y=140)
 
         def print_answers():
             print("Selected Option: {}".format(value_inside.get()))
@@ -77,16 +77,37 @@ class StartPage(tk.Frame):
                 browseFiles()
 
             return None
-        submit_button = tk.Button(self, text='Submit', command=print_answers)
-        submit_button.place(x=100,y=140)
+        submit_button = tk.Button(self, text='Load', command=print_answers)
+        submit_button.place(x=395, y=180)
 
         def browseFiles():
             filename = tk.filedialog.askopenfilename(initialdir="/", title="Select a File",
                                                      filetypes=(("Text files","*.txt*"), ("all files","*.*")))
+        welcome_message = tk.Label(self, text="Hi welcome to our dimensionality reduction tool. In this tool we will attempt"
+                                                    " to help you visualization distortions in UMAP imparted in 2D!")
+        welcome_message.place(x=50,y=100)
+        welcome_message_2 = tk.Label(self, text="To get started must selected a dataset.")
+        welcome_message_2.place(x=50,y=120)
+        instruction_1 = tk.Label(self, text="1. Select your data set")
+        instruction_1.place(x=50,y=220)
 
-        instructions = tk.Label(self, text="1. Select your data set"
-                                           "2. Check out your UMAP")
-        instructions.place(x=250,y=250)
+        instruction_2 = tk.Label(self, text="2. Check out your UMAP")
+        instruction_2.place(x=50,y=240)
+
+        instruction_3 = tk.Label(self, text="3. Select number neighbors by keeping the number of neighbors low you "
+                                              "focus on local structure as k increases more global structure is probed")
+        instruction_3.place(x=50, y=260)
+        instruction_4 = tk.Label(self, text="4. Click show distortions, when k-neighbors is low local structure is "
+                                            "probed when k is high more global structure is probed")
+        instruction_4.place(x=50,y=280)
+        instruction_5 = tk.Label(self, text="5. Explore! By clicking on the map you can see the point you clicked closest"
+                                            "to in high dimension and its 4 nearest neighbors in high and low dimension")
+        instruction_5.place(x=50, y=300)
+        instruction_6 = tk.Label(self, text="Protip: Along the bottom are additional zoom and pan functionality to help"
+                                            " you explore as you wish")
+        instruction_6.place(x=50,y=320)
+
+
 
 class PageOne(tk.Frame):
 
