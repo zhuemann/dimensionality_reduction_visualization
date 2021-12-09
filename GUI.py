@@ -42,7 +42,7 @@ class NearNeighborVisualization(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(StartPage)
+        self.show_frame(PageOne)
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -102,65 +102,54 @@ class PageOne(tk.Frame):
         #Rahul's code
         myumap = MyUmap()
         myumap.make_umap()
-        fig = myumap.show_classes()
 
-        def update_canvas(fig):
-            canvas = FigureCanvasTkAgg(fig, self)
-            canvas.draw()
-            canvas.get_tk_widget().place(x=10, y=40)
-            #toolbar = NavigationToolbar2Tk(canvas, self)
-            #toolbar.update()
-            #canvas._tkcanvas.pack(side=tk.TOP, fill=None, expand=False)
-            canvas._tkcanvas.place(x=10, y=40)
 
-        update_canvas(fig)
+        fig = plt.figure(figsize=(4, 4),dpi=100)
+        myumap.show_classes(fig)
+        canvas = FigureCanvasTkAgg(fig, self)
+        canvas.draw()
+        canvas.get_tk_widget().place(x=10, y=40)
+        # canvas._tkcanvas.place(x=10, y=40)
+
         toolbar = NavigationToolbar2Tk(fig.canvas, self)
         toolbar.update()
-        def update_canvas_sidepanel(fig_2):
-            canvas = FigureCanvasTkAgg(fig_2, self)
-            canvas.draw()
-            canvas.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
-            canvas._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
-            canvas._tkcanvas.place(x=420, y=240)
 
 
-        fig_2 = myumap.show_sidepanel()
-        update_canvas_sidepanel(fig_2)
+        fig_2 = myumap.generate_sidepanel()
+        canvas_2 = FigureCanvasTkAgg(fig_2, self)
+        canvas_2.draw()
+        canvas_2.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
+        canvas_2._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
+        canvas_2._tkcanvas.place(x=420, y=240)
 
-        def update_canvas_clickpoint(fig_3):
-            canvas = FigureCanvasTkAgg(fig_3, self)
-            canvas.draw()
-            canvas.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
-            canvas._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
-            canvas._tkcanvas.place(x=600, y=40)
 
-        fig_3 = myumap.show_clickedpoint(point=None)
-        update_canvas_clickpoint(fig_3)
+        fig_3 = plt.figure(figsize=(2, 2),dpi=100)
+        fig_3.add_subplot(111)
+        canvas_3 = FigureCanvasTkAgg(fig_3, self)
+        canvas_3.draw()
+        canvas_3.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
+        canvas_3._tkcanvas.pack(side=tk.RIGHT, fill=None, expand=False)
+        canvas_3._tkcanvas.place(x=600, y=40)
 
 
         def switch_distortion_class():
             if btn_text.get() == "Show Distortions":
                 k = scalevar.get()
-                fig = myumap.show_distortion(k)
-                update_canvas(fig)
-                fig.canvas.mpl_connect('button_press_event', onclick)
-                plt.close(fig)
+                myumap.show_distortion(fig,k)
+                canvas.draw()
+                print(fig.axes)
                 btn_text.set("Show Classes")
             else:
-                fig = myumap.show_classes()
-                update_canvas(fig)
-                fig.canvas.mpl_connect('button_press_event', onclick)
-                plt.close(fig)
+                myumap.show_classes(fig)
+                canvas.draw()
                 btn_text.set("Show Distortions")
 
         def update_k(value=None):
             if btn_text.get() == "Show Classes":
                 k = scalevar.get()
                 print('k = ',k)
-                fig = myumap.show_distortion(k)
-                update_canvas(fig)
-                fig.canvas.mpl_connect('button_press_event', onclick)
-                plt.close(fig)
+                myumap.show_distortion(fig,k)
+                canvas.draw()
 
         btn_text = tk.StringVar()
         btn_text.set("Show Distortions")
@@ -184,12 +173,9 @@ class PageOne(tk.Frame):
             point = np.array([x,y])
             print(point)
             # # updates the plots for closest neighbors
-            fig_2 = myumap.show_sidepanel_click(point)
-            update_canvas_sidepanel(fig_2)
-            plt.close(fig_2)
-            fig_3 = myumap.show_clickedpoint(point)
-            update_canvas_clickpoint(fig_3)
-            plt.close(fig_3)
+            myumap.show_click_response(fig,canvas,fig_2,fig_3,point)
+            canvas_2.draw()
+            canvas_3.draw()
 
 
         fig.canvas.mpl_connect('button_press_event', onclick)

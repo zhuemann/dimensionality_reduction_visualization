@@ -41,26 +41,19 @@ class MyUmap():
         reducer.fit(digits.data)
         self.embedding = reducer.transform(digits.data)
 
-        # np.save('embed',self.embedding)
-        # self.embedding = np.load('embed.npy')
-
         assert (np.all(self.embedding == reducer.embedding_))
 
-        return self.embedding, self.target  # digits.target
+    def KNN(self, k, point, embedding):
+        return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
-    def show_distortion(self, k=1):
-        def KNN(k, point, embedding):
-            return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
-
-        embedding = self.embedding
-        data = self.data
+    def show_distortion(self, fig, k=1):
         distortion = []
-        for query in range(len(embedding)):
-            kidx2D = KNN(k, embedding[query], embedding)
-            knn2D = embedding[kidx2D]
+        for query in range(len(self.embedding)):
+            kidx2D = self.KNN(k, self.embedding[query], self.embedding)
+            knn2D = self.embedding[kidx2D]
 
-            kidxHD = KNN(k, data[query], data)
-            knnHD = embedding[kidxHD]
+            kidxHD = self.KNN(k, self.data[query], self.data)
+            knnHD = self.embedding[kidxHD]
 
             set2D = set(kidx2D)
             setHD = set(kidxHD)
@@ -71,27 +64,26 @@ class MyUmap():
 
         distortion = np.array(distortion)
 
-        fig = plt.figure(figsize=(4, 4), dpi=100)
+        fig.clear()
         a_sub = fig.add_subplot(111)
-        sp = a_sub.scatter(embedding[:, 0], embedding[:, 1], c=distortion, cmap='seismic', s=5)
-        cbar = fig.colorbar(sp)
-        plt.title('Distortion Map of the Digits dataset for neighbors={}'.format(k), fontsize=8);
+        sp = a_sub.scatter(self.embedding[:, 0], self.embedding[:, 1], c=distortion, cmap='seismic', s=5)
+        fig.colorbar(sp)
+        a_sub.set_title('Distortion Map of the Digits dataset for neighbors={}'.format(k), fontsize=8);
         # cbar.ax.set_ylabel('Distortion (Fraction of neighbors that are different in 2D compared to high dimensions)',fontsize=6)
-        return fig
 
-    def show_classes(self):
-        embedding = self.embedding
-        fig = plt.figure(figsize=(4, 4),dpi=100)
+
+    def show_classes(self, fig):
+
+        fig.clear()
+        # cursor = Cursor(a_sub, horizOn=True, vertOn=True, useblit=True,
+        #                 color='r', linewidth=1)
         a_sub = fig.add_subplot(111)
-        cursor = Cursor(a_sub, horizOn=True, vertOn=True, useblit=True,
-                        color='r', linewidth=1)
-        sp = a_sub.scatter(embedding[:, 0], embedding[:, 1], c=self.target, cmap='Spectral', s=5)
-        plt.gca().set_aspect('equal', 'datalim')
-        plt.colorbar(sp, boundaries=np.arange(11) - 0.5).set_ticks(np.arange(10))
-        plt.title('UMAP projection of the Digits dataset', fontsize=8);
-        return fig
+        sp = a_sub.scatter(self.embedding[:, 0], self.embedding[:, 1], c=self.target, cmap='Spectral', s=5)
+        # plt.gca().set_aspect('equal', 'datalim')
+        fig.colorbar(sp, boundaries=np.arange(11) - 0.5).set_ticks(np.arange(10))
+        a_sub.set_title('UMAP projection of the Digits dataset', fontsize=8)
 
-    def show_sidepanel(self):
+    def generate_sidepanel(self):
         fig_2 = plt.figure(figsize=(4, 2), dpi=100)
         a_sub_2 = fig_2.add_subplot(241)
         a_sub_2 = fig_2.add_subplot(242)
@@ -103,53 +95,54 @@ class MyUmap():
         a_sub_2 = fig_2.add_subplot(248)
         return fig_2
 
-    def show_sidepanel_data(self, fig_2, point):
+    # def show_sidepanel_data(self, fig_2, point):
 
-        def KNN(k, point, embedding):
-            return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
+    #     def KNN(k, point, embedding):
+    #         return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
-        nearest_2d_points = KNN(4, point, self.embedding)
-        nearest_hd_points = KNN(4, point, self.data)
-        print(nearest_2d_points)
-        print(nearest_hd_points)
+    #     nearest_2d_points = KNN(4, point, self.embedding)
+    #     nearest_hd_points = KNN(4, point, self.data)
+    #     print(nearest_2d_points)
+    #     print(nearest_hd_points)
+
+    #     for i in range(0, 4):
+    #         fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
+    #         fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
+
+    def show_click_response(self, fig, canvas, fig_2, fig_3, point=None):
+
+        closest_idx = self.KNN(1, point, self.embedding)[0]
+        point = self.embedding[closest_idx]
+        nearest_2d_points = self.KNN(4, point, self.embedding)
+        nearest_hd_points = self.KNN(4, self.data[closest_idx], self.data)
+
+        a_sub = fig.axes[0]
+        abc = a_sub.scatter(self.embedding[closest_idx, 0], self.embedding[closest_idx, 1], c='k',marker='*', s=100)
+        abc2 = a_sub.scatter(self.embedding[nearest_hd_points, 0], self.embedding[nearest_hd_points, 1], c='k', s=25)
+
+        canvas.draw()
+        abc.remove()
+        abc2.remove()
 
         for i in range(0, 4):
             fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
             fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
 
-    def show_sidepanel_click(self, point=None):
+        fig_3.axes[0].imshow(self.data[closest_idx].reshape(8, 8))
 
-        def KNN(k, point, embedding):
-            return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
-        closest_idx = KNN(1, point, self.embedding)[0]
-        point = self.embedding[closest_idx]
-        nearest_2d_points = KNN(4, point, self.embedding)
-        nearest_hd_points = KNN(4, self.data[closest_idx], self.data)
 
-        # ipdb.set_trace()
-        fig_2 = plt.figure(figsize=(4, 2), dpi=100)
-
-        for i in range(4):
-            a_sub_2 = fig_2.add_subplot(241 + i)
-            a_sub_2.imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
-        for i in range(4):
-            a_sub_2 = fig_2.add_subplot(245 + i)
-            a_sub_2.imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
-
-        return fig_2
-
-    def show_clickedpoint(self, point):
-        fig = plt.figure(figsize=(2, 2),dpi=100)
-        sub_plot = fig.add_subplot(111)
-        # Shows the image for the closest point clicked
-        if np.any(point != None):
-            def KNN(k, point, embedding):
-                return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
-            print(point)
-            closest_idx = KNN(1, point, self.embedding)[0]
-            sub_plot.imshow(self.data[closest_idx].reshape(8, 8))
-        return fig
+    # def show_clickedpoint(self, point):
+    #     fig = plt.figure(figsize=(2, 2),dpi=100)
+    #     sub_plot = fig.add_subplot(111)
+    #     # Shows the image for the closest point clicked
+    #     if np.any(point != None):
+    #         def KNN(k, point, embedding):
+    #             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
+    #         print(point)
+    #         closest_idx = KNN(1, point, self.embedding)[0]
+    #         sub_plot.imshow(self.data[closest_idx].reshape(8, 8))
+    #     return fig
 
 
 
