@@ -17,7 +17,7 @@ import numpy as np
 
 
 LARGE_FONT = ("Verdana", 12)
-DATASET = 1
+DATASET = 2
 
 class NearNeighborVisualization(tk.Tk):
 

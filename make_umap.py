@@ -21,6 +21,8 @@ class MyUmap():
         self.images = None
         self.DATASET=None
         self.image_res={1:8,2:28,3:32}
+        self.kidx2D=None
+        self.kidxHD=None
 
     def load_data(self,DATASET):
         print('DATASET ',DATASET)
@@ -37,8 +39,8 @@ class MyUmap():
             print('loading fmnist dataset')
             from sklearn.datasets import fetch_openml
             fmnist = fetch_openml(data_id = 40996)
-            self.data = fmnist.data.to_numpy()[:1000]
-            self.target = fmnist.target.to_numpy(int)[:1000]
+            self.data = fmnist.data.to_numpy()[:5000]
+            self.target = fmnist.target.to_numpy(int)[:5000]
             print(self.data.shape,self.target.shape)
 
         elif DATASET==3:
@@ -85,6 +87,8 @@ class MyUmap():
               from sklearn.utils import shuffle
               data, target = shuffle(np.array(data), np.array(target), random_state=0)
               data = data.reshape(data.shape[0],-1)
+            self.data = data
+            self.target = target
 
     def make_umap(self):
 
@@ -103,23 +107,34 @@ class MyUmap():
 
         assert (np.all(self.embedding == reducer.embedding_))
 
+        self.precompute_KNN()
+
     def KNN(self, k, point, embedding):
         return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
+
+    def precompute_KNN(self):
+        k = 100
+        allpts2D=[]
+        allptsHD=[]
+        for query in range(len(self.embedding)):
+            kidx2D = self.KNN(k, self.embedding[query], self.embedding)
+            kidxHD = self.KNN(k, self.data[query], self.data)
+            allpts2D.append(kidx2D)
+            allptsHD.append(kidxHD)
+        self.kidx2D = np.array(allpts2D)
+        self.kidxHD = np.array(allptsHD)
+        print('precomputed knn ',self.kidx2D.shape)
+
 
     def show_distortion(self, fig, k=1):
         distortion = []
         for query in range(len(self.embedding)):
-            kidx2D = self.KNN(k, self.embedding[query], self.embedding)
-            knn2D = self.embedding[kidx2D]
 
-            kidxHD = self.KNN(k, self.data[query], self.data)
-            knnHD = self.embedding[kidxHD]
-
-            set2D = set(kidx2D)
-            setHD = set(kidxHD)
+            set2D = set(self.kidx2D[query,:k])
+            setHD = set(self.kidxHD[query,:k])
 
             i = set2D.intersection(setHD)
-            score = 1 - (len(i) / len(kidx2D))
+            score = 1 - (len(i) / len(set2D))
             distortion.append(score)
 
         distortion = np.array(distortion)
@@ -173,8 +188,8 @@ class MyUmap():
 
         closest_idx = self.KNN(1, point, self.embedding)[0]
         point = self.embedding[closest_idx]
-        nearest_2d_points = self.KNN(max(4,k), point, self.embedding)
-        nearest_hd_points = self.KNN(max(4,k), self.data[closest_idx], self.data)
+        nearest_2d_points = self.kidx2D[closest_idx,:max(4,k)]
+        nearest_hd_points = self.kidxHD[closest_idx,:max(4,k)]
 
         a_sub = fig.axes[0]
         abc = a_sub.scatter(self.embedding[closest_idx, 0], self.embedding[closest_idx, 1], c='k',marker='*', s=100)
