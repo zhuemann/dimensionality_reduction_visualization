@@ -79,7 +79,7 @@ class StartPage(tk.Frame):
             if value_inside.get() == options[2]:
                 print("put select your own pathing fucntion here")
                 browseFiles()
-                DATASET = 3
+                DATASET = '/<path to dataset>' # DATASET will be path for custom dataset
 
             return None
         submit_button = tk.Button(self, text='Load', command=print_answers)

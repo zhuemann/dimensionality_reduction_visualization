@@ -18,27 +18,73 @@ class MyUmap():
         self.data = None
         self.embedding = None
         self.target = None
-        self.nclasses = None
         self.images = None
+        self.DATASET=None
+        self.image_res={1:8,2:28,3:32}
 
     def load_data(self,DATASET):
+        print('DATASET ',DATASET)
+        self.DATASET=DATASET
         if DATASET==1:
             print('loading digits dataset')
             from sklearn.datasets import load_digits
             digits = load_digits()
             self.data = digits.data
             self.target = digits.target
-            self.nclasses = np.unique(self.target).shape[0]
             print(self.data.shape,self.target.shape)
 
-        if DATASET==2:
+        elif DATASET==2:
             print('loading fmnist dataset')
             from sklearn.datasets import fetch_openml
             fmnist = fetch_openml(data_id = 40996)
             self.data = fmnist.data.to_numpy()[:1000]
             self.target = fmnist.target.to_numpy(int)[:1000]
-            self.nclasses = np.unique(self.target).shape[0]
             print(self.data.shape,self.target.shape)
+
+        elif DATASET==3:
+            print('loading cifar10 dataset')
+            from sklearn.datasets import fetch_openml
+            cifar = fetch_openml(data_id = 40926)
+            self.data = cifar.data.to_numpy(int)[:1000]
+            self.target = cifar.target.to_numpy(int)[:1000]
+            print(self.data.shape,self.target.shape)
+
+        else:
+            path = DATASET
+            print('loading custom dataset - can handle single csv file, single text file and image folders')
+            # path = 'train'
+            if path[-3:]=='csv':
+              df = pd.read_csv(path, header = 0)
+              df = df._get_numeric_data()
+              numpy_array = df.to_numpy()
+              data = numpy_array[:,:-1]
+              target = numpy_array[:,-1]
+
+            elif path[-3:]=='txt':
+              df = pd.read_csv(path, header = 0, delimiter = " ")
+              df = df._get_numeric_data()
+              numpy_array = df.to_numpy()
+              data = numpy_array[:,:-1]
+              target = numpy_array[:,-1]
+
+            else: # path to directory containing sub directories containing images of each class
+              from os import listdir
+              from os.path import isfile, join, isdir
+              import re
+              import matplotlib.pyplot as plt
+
+              category_folders = [join(path, f) for f in listdir(path) if isdir(join(path, f))]
+              data = []
+              target = []
+              for label, category in enumerate(category_folders):
+                files = [join(category, f) for f in listdir(join(category)) if isfile(join(category, f))]
+                for file in files:
+                    img = plt.imread(file)
+                    data.append(img)
+                    target.append(label)
+              from sklearn.utils import shuffle
+              data, target = shuffle(np.array(data), np.array(target), random_state=0)
+              data = data.reshape(data.shape[0],-1)
 
     def make_umap(self):
 
@@ -138,11 +184,13 @@ class MyUmap():
         abc.remove()
         abc2.remove()
 
-        for i in range(4):
-            fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
-            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
+        res = self.image_res[self.DATASET]
 
-        fig_3.axes[0].imshow(self.data[closest_idx].reshape(8, 8))
+        for i in range(4):
+            fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(res, res))
+            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(res, res))
+
+        fig_3.axes[0].imshow(self.data[closest_idx].reshape(res, res))
 
 
 
