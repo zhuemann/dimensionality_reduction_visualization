@@ -17,7 +17,8 @@ import numpy as np
 
 
 LARGE_FONT = ("Verdana", 12)
-DATASET = 2
+DATASET = 1
+MYUMAP = MyUmap()
 
 class NearNeighborVisualization(tk.Tk):
 
@@ -73,13 +74,19 @@ class StartPage(tk.Frame):
             if value_inside.get() == options[0]:
                 print("put Umap digits call here")
                 DATASET = 1
+                MYUMAP.load_data(DATASET)
+                MYUMAP.make_umap()
             if value_inside.get() == options[1]:
                 print("put Umap fashion call here")
                 DATASET = 2
+                MYUMAP.load_data(DATASET)
+                MYUMAP.make_umap()
             if value_inside.get() == options[2]:
                 print("put select your own pathing fucntion here")
                 browseFiles()
                 DATASET = '/<path to dataset>' # DATASET will be path for custom dataset
+                MYUMAP.load_data(DATASET)
+                MYUMAP.make_umap()
 
             return None
         submit_button = tk.Button(self, text='Load', command=print_answers)
@@ -126,13 +133,13 @@ class PageOne(tk.Frame):
         button1.place(x=50,y=1)
 
         #Rahul's code
-        myumap = MyUmap()
-        myumap.load_data(DATASET)
-        myumap.make_umap()
+        #myumap = MyUmap()
+        MYUMAP.load_data(DATASET)
+        MYUMAP.make_umap()
 
 
         fig = plt.figure(figsize=(4, 4),dpi=100)
-        myumap.show_classes(fig)
+        MYUMAP.show_classes(fig)
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
         canvas.get_tk_widget().place(x=10, y=40)
@@ -142,7 +149,7 @@ class PageOne(tk.Frame):
         toolbar.update()
 
 
-        fig_2 = myumap.generate_sidepanel()
+        fig_2 = MYUMAP.generate_sidepanel()
         canvas_2 = FigureCanvasTkAgg(fig_2, self)
         canvas_2.draw()
         canvas_2.get_tk_widget().pack(side=tk.RIGHT, fill=None, expand=False)
@@ -162,12 +169,12 @@ class PageOne(tk.Frame):
         def switch_distortion_class():
             if btn_text.get() == "Show Distortions":
                 k = scalevar.get()
-                myumap.show_distortion(fig,k)
+                MYUMAP.show_distortion(fig,k)
                 canvas.draw()
                 print(fig.axes)
                 btn_text.set("Show Classes")
             else:
-                myumap.show_classes(fig)
+                MYUMAP.show_classes(fig)
                 canvas.draw()
                 btn_text.set("Show Distortions")
 
@@ -175,7 +182,7 @@ class PageOne(tk.Frame):
             if btn_text.get() == "Show Classes":
                 k = scalevar.get()
                 print('k = ',k)
-                myumap.show_distortion(fig,k)
+                MYUMAP.show_distortion(fig,k)
                 canvas.draw()
 
         btn_text = tk.StringVar()
@@ -201,7 +208,7 @@ class PageOne(tk.Frame):
             print(point)
             k = scalevar.get()
             # # updates the plots for closest neighbors
-            myumap.show_click_response(fig,canvas,fig_2,fig_3,k,point)
+            MYUMAP.show_click_response(fig,canvas,fig_2,fig_3,k,point)
             canvas_2.draw()
             canvas_3.draw()
 

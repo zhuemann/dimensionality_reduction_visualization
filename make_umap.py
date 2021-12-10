@@ -39,6 +39,7 @@ class MyUmap():
             print('loading fmnist dataset')
             from sklearn.datasets import fetch_openml
             fmnist = fetch_openml(data_id = 40996)
+            print("mnist is loaded!")
             self.data = fmnist.data.to_numpy()[:5000]
             self.target = fmnist.target.to_numpy(int)[:5000]
             print(self.data.shape,self.target.shape)
