@@ -143,10 +143,9 @@ class MyUmap():
         fig.clear()
         a_sub = fig.add_subplot(111)
         sp = a_sub.scatter(self.embedding[:, 0], self.embedding[:, 1], c=distortion, cmap='seismic', s=5)
-        fig.colorbar(sp)
-        a_sub.set_title('Distortion Map of the Digits dataset for neighbors={}'.format(k), fontsize=8);
-        # cbar.ax.set_ylabel('Distortion (Fraction of neighbors that are different in 2D compared to high dimensions)',fontsize=6)
-
+        cbar = fig.colorbar(sp)
+        a_sub.set_title('Distortion Map for Neighbors={}'.format(k), fontsize=12);
+        fig.text(0.9,0.4,'Distortion',rotation=90,fontsize=10)
 
     def show_classes(self, fig):
 
@@ -156,19 +155,42 @@ class MyUmap():
         a_sub = fig.add_subplot(111)
         sp = a_sub.scatter(self.embedding[:, 0], self.embedding[:, 1], c=self.target, cmap='Spectral', s=5)
         # plt.gca().set_aspect('equal', 'datalim')
-        fig.colorbar(sp, boundaries=np.arange(11) - 0.5).set_ticks(np.arange(10))
-        a_sub.set_title('UMAP projection of the Digits dataset', fontsize=8)
+        cbar = fig.colorbar(sp, boundaries=np.arange(11) - 0.5).set_ticks(np.arange(10))
+        a_sub.set_title('UMAP Projection of the Dataset', fontsize=12)
+        fig.text(0.9,0.4,'Class Index',rotation=90,fontsize=10)
 
     def generate_sidepanel(self):
-        fig_2 = plt.figure(figsize=(4, 2), dpi=100)
+        fig_2 = plt.figure(figsize=(5.3, 2.5), dpi=100)
         a_sub_2 = fig_2.add_subplot(241)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(242)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(243)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(244)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(245)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(246)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(247)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
         a_sub_2 = fig_2.add_subplot(248)
+        a_sub_2.get_xaxis().set_visible(False)
+        a_sub_2.get_yaxis().set_visible(False)
+        fig_2.text(0.05, 0.7, '2D',fontsize=8)
+        fig_2.text(0.01, 0.65, 'Neighbors',fontsize=8)
+        fig_2.text(0.05, 0.3, 'HD',fontsize=8)
+        fig_2.text(0.01, 0.25, 'Neighbors',fontsize=8)
+
+        fig_2.suptitle('Neighboring Data Points in 2D v/s High Dimensions (HD)')
         return fig_2
 
     # def show_sidepanel_data(self, fig_2, point):
@@ -193,12 +215,38 @@ class MyUmap():
         nearest_hd_points = self.kidxHD[closest_idx,:max(4,k)]
 
         a_sub = fig.axes[0]
-        abc = a_sub.scatter(self.embedding[closest_idx, 0], self.embedding[closest_idx, 1], c='k',marker='*', s=100)
-        abc2 = a_sub.scatter(self.embedding[nearest_hd_points[:k], 0], self.embedding[nearest_hd_points[:k], 1], c='k', s=25)
+        # abc = a_sub.scatter(self.embedding[closest_idx, 0], self.embedding[closest_idx, 1], c='k',marker='*', s=100)
+        # abc2 = a_sub.scatter(self.embedding[nearest_hd_points[:k], 0], self.embedding[nearest_hd_points[:k], 1], c='k', s=25)
 
+        b = self.embedding[nearest_hd_points[:k]]
+        # print('b shape',b.shape)
+
+        # point = np.array([0.4,0.5])
+        a = np.repeat(point[np.newaxis,:], b.shape[0],axis=0)
+        # print('a shape',a.shape)
+
+        # fig, ax = plt.subplots(figsize=(3, 3))
+        ab_pairs = np.c_[a, b]
+        ab_args = ab_pairs.reshape(-1, 2, 2).swapaxes(1, 2).reshape(-1, 2)
+
+        # segments
+        abc3 = a_sub.plot(*ab_args, c='k')
+
+        # identify points: a in blue, b in red
+        abc = a_sub.plot(*a.T, 'bo',markerfacecolor='none',ms=10,mew=2)
+        abc2 = a_sub.plot(*b.T, 'ro',markerfacecolor='none',ms=10)
+        # ax.plot(*a.T, 'bo',markerfacecolor='blue',ms=4)
+        # ax.plot(*b.T, 'ro',markerfacecolor='red',ms=4)
+
+        # import ipdb
+        # ipdb.set_trace()
         canvas.draw()
-        abc.remove()
-        abc2.remove()
+        l = abc.pop(0)
+        l.remove()
+        l2 = abc2.pop(0)
+        l2.remove()
+        for l3 in abc3:
+            l3.remove()
 
         res = self.image_res[self.DATASET]
 
