@@ -25,7 +25,6 @@ class MyUmap():
         self.kidxHD=None
 
     def load_data(self,DATASET):
-        print('DATASET ',DATASET)
         self.DATASET=DATASET
         if DATASET==1:
             print('loading digits dataset')
@@ -33,24 +32,24 @@ class MyUmap():
             digits = load_digits()
             self.data = digits.data
             self.target = digits.target
-            print(self.data.shape,self.target.shape)
+            print('dataset loaded.')
 
         elif DATASET==2:
-            print('loading fmnist dataset')
+            print('loading fashion mnist dataset')
             from sklearn.datasets import fetch_openml
             fmnist = fetch_openml(data_id = 40996)
             print("mnist is loaded!")
-            self.data = fmnist.data.to_numpy()[:5000]
-            self.target = fmnist.target.to_numpy(int)[:5000]
-            print(self.data.shape,self.target.shape)
+            self.data = fmnist.data.to_numpy()[:100]
+            self.target = fmnist.target.to_numpy(int)[:100]
+            print('dataset loaded.')
 
         elif DATASET==3:
             print('loading cifar10 dataset')
             from sklearn.datasets import fetch_openml
             cifar = fetch_openml(data_id = 40926)
-            self.data = cifar.data.to_numpy(int)[:1000]
-            self.target = cifar.target.to_numpy(int)[:1000]
-            print(self.data.shape,self.target.shape)
+            self.data = cifar.data.to_numpy(int)[:100]
+            self.target = cifar.target.to_numpy(int)[:100]
+            print('dataset loaded.')
 
         else:
             path = DATASET
@@ -90,8 +89,11 @@ class MyUmap():
               data = data.reshape(data.shape[0],-1)
             self.data = data
             self.target = target
+            print('dataset loaded.')
+
 
     def make_umap(self):
+        print('Generating UMAP')
 
         reducer = umap.UMAP(a=None, angular_rp_forest=False, b=None,
                             force_approximation_algorithm=False, init='spectral', learning_rate=1.0,
@@ -108,12 +110,15 @@ class MyUmap():
 
         assert (np.all(self.embedding == reducer.embedding_))
 
+        print('UMAP generated')
+
         self.precompute_KNN()
 
     def KNN(self, k, point, embedding):
         return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
 
     def precompute_KNN(self):
+        print('Precomputing neighbors')
         k = 100
         allpts2D=[]
         allptsHD=[]
@@ -124,7 +129,7 @@ class MyUmap():
             allptsHD.append(kidxHD)
         self.kidx2D = np.array(allpts2D)
         self.kidxHD = np.array(allptsHD)
-        print('precomputed knn ',self.kidx2D.shape)
+        print('Precomputation complete')
 
 
     def show_distortion(self, fig, k=1):
@@ -251,8 +256,8 @@ class MyUmap():
         res = self.image_res[self.DATASET]
 
         for i in range(4):
-            fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(res, res))
-            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(res, res))
+            fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(res, res,-1))
+            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(res, res,-1))
 
         fig_3.axes[0].imshow(self.data[closest_idx].reshape(res, res))
 

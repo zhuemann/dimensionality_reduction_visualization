@@ -18,7 +18,7 @@ import numpy as np
 
 LARGE_FONT = ("Verdana", 12)
 DATASET = 1
-MYUMAP = MyUmap()
+
 
 class NearNeighborVisualization(tk.Tk):
 
@@ -29,25 +29,16 @@ class NearNeighborVisualization(tk.Tk):
         tk.Tk.wm_title(self, "NearNeighborVisualization")
 
 
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-
-        self.frames = {}
-
-        for F in (StartPage, PageOne):
-            frame = F(container, self)
-
-            self.frames[F] = frame
-
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame(PageOne)
+        self.container = tk.Frame(self)
+        self.container.pack(side="top", fill="both", expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+        self.show_frame(StartPage)
 
     def show_frame(self, cont):
-        frame = self.frames[cont]
+        F=cont
+        frame = F(self.container, self)
+        frame.grid(row=0, column=0, sticky="nsew")
         frame.tkraise()
 
 
@@ -58,9 +49,9 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Welcome", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
-        button = ttk.Button(self, text="UMap",
-                            command=lambda: controller.show_frame(PageOne))
-        button.place(x=380, y=400)
+        # button = ttk.Button(self, text="UMap",
+        #                     command=lambda: controller.show_frame(PageOne))
+        # button.place(x=380, y=400)
 
         options = ["MNIST Digits", "MNIST Fashion", "Select Your Own"]
         value_inside = tk.StringVar(self)
@@ -68,28 +59,22 @@ class StartPage(tk.Frame):
         drop = tk.OptionMenu(self, value_inside, *options)
         drop.place(x=350, y=140)
 
-        def print_answers():
+        def select_option():
             global DATASET
             print("Selected Option: {}".format(value_inside.get()))
             if value_inside.get() == options[0]:
-                print("put Umap digits call here")
                 DATASET = 1
-                MYUMAP.load_data(DATASET)
-                MYUMAP.make_umap()
+
             if value_inside.get() == options[1]:
-                print("put Umap fashion call here")
                 DATASET = 2
-                MYUMAP.load_data(DATASET)
-                MYUMAP.make_umap()
+
             if value_inside.get() == options[2]:
-                print("put select your own pathing fucntion here")
                 browseFiles()
                 DATASET = '/<path to dataset>' # DATASET will be path for custom dataset
-                MYUMAP.load_data(DATASET)
-                MYUMAP.make_umap()
+            controller.show_frame(PageOne)
 
             return None
-        submit_button = tk.Button(self, text='Load', command=print_answers)
+        submit_button = tk.Button(self, text='Load', command=select_option)
         submit_button.place(x=395, y=180)
 
         def browseFiles():
@@ -100,18 +85,22 @@ class StartPage(tk.Frame):
         welcome_message.place(x=50,y=80)
         welcome_message = tk.Label(self, text="in UMAP imparted in 2D!")
         welcome_message.place(x=50,y=100)
-        welcome_message_2 = tk.Label(self, text="To get started must selected a dataset.")
+        welcome_message_2 = tk.Label(self, text="To get started must select a dataset.")
         welcome_message_2.place(x=50,y=120)
-        instruction_1 = tk.Label(self, text="1. Select your data set.")
+
+        instruction_1 = tk.Label(self, text="Instructions:")
         instruction_1.place(x=50,y=220)
 
-        instruction_2 = tk.Label(self, text="2. Check out your UMAP.")
-        instruction_2.place(x=50,y=240)
+        instruction_1 = tk.Label(self, text="1. Select your data set and click 'Load'. Please wait while the dataset is being loaded and umap is being generated.")
+        instruction_1.place(x=50,y=240)
 
-        instruction_3 = tk.Label(self, text="3. Select desired number neighbors")
+        # instruction_2 = tk.Label(self, text="Once the UMAP is generated, you will be directed to the next page.")
+        # instruction_2.place(x=50,y=240)
+
+        instruction_3 = tk.Label(self, text="2. On the next page, select desired number neighbors")
         instruction_3.place(x=50, y=260)
 
-        instruction_4 = tk.Label(self, text="4. Click on any point on the UMAP. You will see its high dimensional neighbors highlighted on the map.")
+        instruction_4 = tk.Label(self, text="3. Click on any point on the UMAP. You will see its high dimensional neighbors highlighted on the map.")
         instruction_4.place(x=50,y=280)
 
         instruction_4 = tk.Label(self, text="You will also see images of neighboring data points in the side panel.")
@@ -120,7 +109,7 @@ class StartPage(tk.Frame):
         instruction_4 = tk.Label(self, text="4. Click show distortions. You will see the distortion map for the selected number of neighbors.")
         instruction_4.place(x=50,y=320)
 
-        instruction_4 = tk.Label(self, text="The color on the map gives the amount of distortion at that point. Distortion is the ratio of changed neighbors in 2D vs HD.")
+        instruction_4 = tk.Label(self, text="Note: Distortion is the fraction of changed neighbors while reducing dimensions to the number of original neighbors.")
         instruction_4.place(x=50,y=340)
 
         instruction_5 = tk.Label(self, text="5. Explore! Probe into any data point, see the variation as # neighbors is changed and visualize the neighboring images.")
@@ -134,7 +123,7 @@ class StartPage(tk.Frame):
 class PageOne(tk.Frame):
 
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
+        tk.Frame.__init__(self, parent)        
         label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
@@ -143,7 +132,7 @@ class PageOne(tk.Frame):
         button1.place(x=150,y=5)
 
         #Rahul's code
-        #myumap = MyUmap()
+        MYUMAP = MyUmap()
         MYUMAP.load_data(DATASET)
         MYUMAP.make_umap()
 
