@@ -53,7 +53,7 @@ class StartPage(tk.Frame):
         #                     command=lambda: controller.show_frame(PageOne))
         # button.place(x=380, y=400)
 
-        options = ["MNIST Digits", "MNIST Fashion", "Select Your Own"]
+        options = ["MNIST Digits", "MNIST Fashion", "CIFAR10", "Select Your Own"]
         value_inside = tk.StringVar(self)
         value_inside.set("Select an Option")
         drop = tk.OptionMenu(self, value_inside, *options)
@@ -69,8 +69,11 @@ class StartPage(tk.Frame):
                 DATASET = 2
 
             if value_inside.get() == options[2]:
-                browseFiles()
-                DATASET = '/<path to dataset>' # DATASET will be path for custom dataset
+                DATASET = 3
+
+            if value_inside.get() == options[3]:
+                DATASET = browseFiles() # DATASET will be path for custom dataset
+                print(DATASET)
             controller.show_frame(PageOne)
 
             return None
@@ -78,8 +81,11 @@ class StartPage(tk.Frame):
         submit_button.place(x=395, y=180)
 
         def browseFiles():
-            filename = tk.filedialog.askopenfilename(initialdir="/", title="Select a File",
-                                                     filetypes=(("Text files","*.txt*"), ("all files","*.*")))
+            # filename = tk.filedialog.askopenfilename(initialdir="/", title="Select a File",
+                                                     # filetypes=(("all files","*.*")))
+            current_directory = tk.filedialog.askdirectory(initialdir="/", title="Select a Directory")
+            return current_directory
+
         welcome_message = tk.Label(self, text="Hi welcome to our dimensionality reduction tool. In this tool we will attempt"
                                                     " to help you visualization distortions")
         welcome_message.place(x=50,y=80)

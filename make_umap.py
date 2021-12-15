@@ -39,16 +39,16 @@ class MyUmap():
             from sklearn.datasets import fetch_openml
             fmnist = fetch_openml(data_id = 40996)
             print("mnist is loaded!")
-            self.data = fmnist.data.to_numpy()[:100]
-            self.target = fmnist.target.to_numpy(int)[:100]
+            self.data = fmnist.data.to_numpy()[:2000]
+            self.target = fmnist.target.to_numpy(int)[:2000]
             print('dataset loaded.')
 
         elif DATASET==3:
             print('loading cifar10 dataset')
             from sklearn.datasets import fetch_openml
             cifar = fetch_openml(data_id = 40926)
-            self.data = cifar.data.to_numpy(int)[:100]
-            self.target = cifar.target.to_numpy(int)[:100]
+            self.data = cifar.data.to_numpy(int)[:2000]
+            self.target = cifar.target.to_numpy(int)[:2000]
             print('dataset loaded.')
 
         else:
@@ -81,11 +81,13 @@ class MyUmap():
               for label, category in enumerate(category_folders):
                 files = [join(category, f) for f in listdir(join(category)) if isfile(join(category, f))]
                 for file in files:
-                    img = plt.imread(file)
+                    img = plt.imread(file).transpose(2,0,1)
                     data.append(img)
                     target.append(label)
+              # import ipdb; ipdb.set_trace()
               from sklearn.utils import shuffle
               data, target = shuffle(np.array(data), np.array(target), random_state=0)
+              self.image_res[DATASET]=img.shape[1] #data.shape[1]
               data = data.reshape(data.shape[0],-1)
             self.data = data
             self.target = target
@@ -256,10 +258,10 @@ class MyUmap():
         res = self.image_res[self.DATASET]
 
         for i in range(4):
-            fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(res, res,-1))
-            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(res, res,-1))
+            fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(-1,res,res).transpose(1,2,0).squeeze())
+            fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(-1,res,res).transpose(1,2,0).squeeze())
 
-        fig_3.axes[0].imshow(self.data[closest_idx].reshape(res, res))
+        fig_3.axes[0].imshow(self.data[closest_idx].reshape(-1,res,res).transpose(1,2,0).squeeze())
 
 
 
