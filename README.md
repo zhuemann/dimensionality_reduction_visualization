@@ -30,6 +30,8 @@ To install the requirements, use
 
 `pip install -r requirements.txt`
 
+Note: If you are using anaconda environment, you might need to install pip first using `conda install -c anaconda pip`
+
 Once the requirements are installed, run the main file and follow the instructions on the interface on how to use the tool.
 
 `python3 main.py`
