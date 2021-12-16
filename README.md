@@ -2,7 +2,7 @@
 
 To clone this repository run
 
-`git clone <repo name>`
+`git clone https://github.com/zhuemann/dimensionality_reduction_visualization.git`
 
 Change the directory to this directory using 
 
