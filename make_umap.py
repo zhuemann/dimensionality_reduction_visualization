@@ -1,16 +1,8 @@
 import numpy as np
 from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
-import requests
-
 import umap
-from matplotlib.widgets import Cursor
-
-import seaborn as sns
-#import ipdb
 
 
 class MyUmap():
@@ -54,7 +46,6 @@ class MyUmap():
         else:
             path = DATASET
             print('loading custom dataset - can handle single csv file, single text file and image folders')
-            # path = 'train'
             if path[-3:]=='csv':
               df = pd.read_csv(path, header = 0)
               df = df._get_numeric_data()
@@ -84,7 +75,6 @@ class MyUmap():
                     img = plt.imread(file).transpose(2,0,1)
                     data.append(img)
                     target.append(label)
-              # import ipdb; ipdb.set_trace()
               from sklearn.utils import shuffle
               data, target = shuffle(np.array(data), np.array(target), random_state=0)
               self.image_res[DATASET]=img.shape[1] #data.shape[1]
@@ -157,11 +147,8 @@ class MyUmap():
     def show_classes(self, fig):
 
         fig.clear()
-        # cursor = Cursor(a_sub, horizOn=True, vertOn=True, useblit=True,
-        #                 color='r', linewidth=1)
         a_sub = fig.add_subplot(111)
         sp = a_sub.scatter(self.embedding[:, 0], self.embedding[:, 1], c=self.target, cmap='Spectral', s=5)
-        # plt.gca().set_aspect('equal', 'datalim')
         cbar = fig.colorbar(sp, boundaries=np.arange(11) - 0.5).set_ticks(np.arange(10))
         a_sub.set_title('UMAP Projection of the Dataset', fontsize=12)
         fig.text(0.9,0.4,'Class Index',rotation=90,fontsize=10)
@@ -200,20 +187,6 @@ class MyUmap():
         fig_2.suptitle('Neighboring Data Points in 2D v/s High Dimensions (HD)')
         return fig_2
 
-    # def show_sidepanel_data(self, fig_2, point):
-
-    #     def KNN(k, point, embedding):
-    #         return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
-
-    #     nearest_2d_points = KNN(4, point, self.embedding)
-    #     nearest_hd_points = KNN(4, point, self.data)
-    #     print(nearest_2d_points)
-    #     print(nearest_hd_points)
-
-    #     for i in range(0, 4):
-    #         fig_2.axes[i].imshow(self.data[nearest_2d_points[i]].reshape(8, 8))
-    #         fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(8, 8))
-
     def show_click_response(self, fig, canvas, fig_2, fig_3, k=4, point=None):
 
         closest_idx = self.KNN(1, point, self.embedding)[0]
@@ -222,31 +195,18 @@ class MyUmap():
         nearest_hd_points = self.kidxHD[closest_idx,:max(4,k)]
 
         a_sub = fig.axes[0]
-        # abc = a_sub.scatter(self.embedding[closest_idx, 0], self.embedding[closest_idx, 1], c='k',marker='*', s=100)
-        # abc2 = a_sub.scatter(self.embedding[nearest_hd_points[:k], 0], self.embedding[nearest_hd_points[:k], 1], c='k', s=25)
-
         b = self.embedding[nearest_hd_points[:k]]
-        # print('b shape',b.shape)
 
-        # point = np.array([0.4,0.5])
         a = np.repeat(point[np.newaxis,:], b.shape[0],axis=0)
-        # print('a shape',a.shape)
 
-        # fig, ax = plt.subplots(figsize=(3, 3))
         ab_pairs = np.c_[a, b]
         ab_args = ab_pairs.reshape(-1, 2, 2).swapaxes(1, 2).reshape(-1, 2)
 
-        # segments
         abc3 = a_sub.plot(*ab_args, c='k')
 
-        # identify points: a in blue, b in red
         abc = a_sub.plot(*a.T, 'bo',markerfacecolor='none',ms=10,mew=2)
         abc2 = a_sub.plot(*b.T, 'ro',markerfacecolor='none',ms=10)
-        # ax.plot(*a.T, 'bo',markerfacecolor='blue',ms=4)
-        # ax.plot(*b.T, 'ro',markerfacecolor='red',ms=4)
 
-        # import ipdb
-        # ipdb.set_trace()
         canvas.draw()
         l = abc.pop(0)
         l.remove()
@@ -262,21 +222,6 @@ class MyUmap():
             fig_2.axes[i + 4].imshow(self.data[nearest_hd_points[i]].reshape(-1,res,res).transpose(1,2,0).squeeze())
 
         fig_3.axes[0].imshow(self.data[closest_idx].reshape(-1,res,res).transpose(1,2,0).squeeze())
-
-
-
-    # def show_clickedpoint(self, point):
-    #     fig = plt.figure(figsize=(2, 2),dpi=100)
-    #     sub_plot = fig.add_subplot(111)
-    #     # Shows the image for the closest point clicked
-    #     if np.any(point != None):
-    #         def KNN(k, point, embedding):
-    #             return np.argsort(np.linalg.norm(embedding - point[np.newaxis, :], axis=-1))[1:k + 1]
-    #         print(point)
-    #         closest_idx = KNN(1, point, self.embedding)[0]
-    #         sub_plot.imshow(self.data[closest_idx].reshape(8, 8))
-    #     return fig
-
 
 
 

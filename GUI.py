@@ -2,17 +2,12 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-from matplotlib.widgets import Slider
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Cursor
-import scipy.spatial
 
 import tkinter as tk
 from tkinter import ttk
 from make_umap import MyUmap
-#from tkinter import *
 from tkinter import HORIZONTAL
-
 import numpy as np
 
 
@@ -25,7 +20,6 @@ class NearNeighborVisualization(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        #tk.Tk.iconbitmap(self, default="clienticon.ico")
         tk.Tk.wm_title(self, "NearNeighborVisualization")
 
 
@@ -49,10 +43,6 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Welcome", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
-        # button = ttk.Button(self, text="UMap",
-        #                     command=lambda: controller.show_frame(PageOne))
-        # button.place(x=380, y=400)
-
         options = ["MNIST Digits", "MNIST Fashion", "CIFAR10", "Select Your Own"]
         value_inside = tk.StringVar(self)
         value_inside.set("Select an Option")
@@ -73,7 +63,6 @@ class StartPage(tk.Frame):
 
             if value_inside.get() == options[3]:
                 DATASET = browseFiles() # DATASET will be path for custom dataset
-                print(DATASET)
             controller.show_frame(PageOne)
 
             return None
@@ -81,8 +70,6 @@ class StartPage(tk.Frame):
         submit_button.place(x=395, y=180)
 
         def browseFiles():
-            # filename = tk.filedialog.askopenfilename(initialdir="/", title="Select a File",
-                                                     # filetypes=(("all files","*.*")))
             current_directory = tk.filedialog.askdirectory(initialdir="/", title="Select a Directory")
             return current_directory
 
@@ -100,29 +87,29 @@ class StartPage(tk.Frame):
         instruction_1 = tk.Label(self, text="1. Select your data set and click 'Load'. Please wait while the dataset is being loaded and umap is being generated.")
         instruction_1.place(x=50,y=240)
 
-        # instruction_2 = tk.Label(self, text="Once the UMAP is generated, you will be directed to the next page.")
-        # instruction_2.place(x=50,y=240)
+        instruction_2 = tk.Label(self, text="Note: If you select your own dataset, select a Directory which contains class-wise sub-directories that contains images of that class.")
+        instruction_2.place(x=50,y=260)
 
         instruction_3 = tk.Label(self, text="2. On the next page, select desired number neighbors")
-        instruction_3.place(x=50, y=260)
+        instruction_3.place(x=50,y=280)
 
         instruction_4 = tk.Label(self, text="3. Click on any point on the UMAP. You will see its high dimensional neighbors highlighted on the map.")
-        instruction_4.place(x=50,y=280)
-
-        instruction_4 = tk.Label(self, text="You will also see images of neighboring data points in the side panel.")
         instruction_4.place(x=50,y=300)
 
-        instruction_4 = tk.Label(self, text="4. Click show distortions. You will see the distortion map for the selected number of neighbors.")
+        instruction_4 = tk.Label(self, text="You will also see images of neighboring data points in the side panel.")
         instruction_4.place(x=50,y=320)
 
-        instruction_4 = tk.Label(self, text="Note: Distortion is the fraction of changed neighbors while reducing dimensions to the number of original neighbors.")
+        instruction_4 = tk.Label(self, text="4. Click show distortions. You will see the distortion map for the selected number of neighbors.")
         instruction_4.place(x=50,y=340)
 
+        instruction_4 = tk.Label(self, text="Note: Distortion is the fraction of changed neighbors while reducing dimensions to the number of original neighbors.")
+        instruction_4.place(x=50,y=360)
+
         instruction_5 = tk.Label(self, text="5. Explore! Probe into any data point, see the variation as # neighbors is changed and visualize the neighboring images.")
-        instruction_5.place(x=50,y=360)
+        instruction_5.place(x=50,y=380)
         instruction_6 = tk.Label(self, text="Protip: Along the bottom are additional zoom and pan functionality to help"
                                             " you explore as you wish!")
-        instruction_6.place(x=50,y=380)
+        instruction_6.place(x=50,y=400)
 
 
 
@@ -137,7 +124,6 @@ class PageOne(tk.Frame):
                              command=lambda: controller.show_frame(StartPage))
         button1.place(x=150,y=5)
 
-        #Rahul's code
         MYUMAP = MyUmap()
         MYUMAP.load_data(DATASET)
         MYUMAP.make_umap()
@@ -148,7 +134,6 @@ class PageOne(tk.Frame):
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
         canvas.get_tk_widget().place(x=30, y=40)
-        # canvas._tkcanvas.place(x=10, y=40)
 
         toolbar = NavigationToolbar2Tk(fig.canvas, self)
         toolbar.place(x=90, y=420)
@@ -216,7 +201,7 @@ class PageOne(tk.Frame):
             point = np.array([x,y])
             print(point)
             k = scalevar.get()
-            # # updates the plots for closest neighbors
+
             MYUMAP.show_click_response(fig,canvas,fig_2,fig_3,k,point)
             canvas_2.draw()
             canvas_3.draw()
