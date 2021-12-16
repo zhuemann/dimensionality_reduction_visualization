@@ -26,7 +26,7 @@ This code requires Python 3.7 and above and requires the following libraries:
 
 - pandas
 
-To install the requirements, use
+To install these libraries/requirements, use
 
 `pip install -r requirements.txt`
 
